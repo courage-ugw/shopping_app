@@ -46,14 +46,25 @@ class Store:
                 all_products.append(product)
         return all_products
 
-    def order(self, shopping_list: list[tuple]) -> float:
+    def order(self, shopping_list: list[tuple]) -> tuple:
         """
         Gets a list of tuples, where each tuple has 2 items:
         Product (Product object) and quantity (int).
-        Buys the products and returns the total price of the order.
+        Buys the products.
+        :returns: the total price of the order and total items received (as tuple)
         """
         total_order_price: float = 0
+        total_item_received: int = 0
         for order in shopping_list:
             product, quantity = order
-            total_order_price += product.buy(quantity)
-        return total_order_price
+            # Total price of order per product
+            total_price = product.buy(product, quantity)
+
+            # if total price is tuple, then it has the buy 2, get 1 free promo
+            if type(total_price) == tuple:
+                total_price, total_item = total_price
+                total_order_price += total_price
+                total_item_received += total_item
+            else:
+                total_order_price += total_price
+        return total_order_price, total_item_received
