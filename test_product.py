@@ -64,20 +64,3 @@ def test_buy_too_much():
     with pytest.raises(ValueError):
         mac_book = Product("MacBook Air M2", price=1450, quantity=100)
         mac_book.buy(mac_book, 400)
-
-
-
-"""
-# setup initial stock of inventory
-mac =  products.Product("MacBook Air M2", price=1450, quantity=100)
-bose = products.Product("Bose QuietComfort Earbuds", price=250, quantity=500)
-pixel = products.LimitedProduct("Google Pixel 7", price=500, quantity=250, maximum=1)
-
-best_buy = store.Store([mac, bose])
-mac.price = -100         # Should give error
-print(mac)               # Should print `MacBook Air M2, Price: $1450 Quantity:100`
-print(mac > bose)        # Should print True
-print(mac in best_buy)   # Should print True
-print(pixel in best_buy) # Should print False
-
-"""
