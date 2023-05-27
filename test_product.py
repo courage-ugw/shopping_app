@@ -44,8 +44,8 @@ def test_product_becomes_inactive():
     Test that when a product reaches 0 quantity, it becomes inactive.
     """
     mac_book = Product("MacBook Air M2", price=1450, quantity=100)
-    mac_book.set_quantity(-100)
-    assert not mac_book.is_active()
+    mac_book.quantity = -100
+    assert not mac_book.is_active
 
 
 def test_buy_modifies_quantity():
@@ -54,7 +54,7 @@ def test_buy_modifies_quantity():
     """
     mac_book = Product("MacBook Air M2", price=1450, quantity=100)
     mac_book.buy(mac_book, 40)
-    assert mac_book.get_quantity() == 60
+    assert mac_book.quantity == 60
 
 
 def test_buy_too_much():
