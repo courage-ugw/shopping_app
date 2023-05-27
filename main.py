@@ -43,11 +43,13 @@ def is_valid(user_choice, validate_order=True) -> bool:
     function validates user choice from the make_order() function
     :return: True or False (Bool)
     """
+    # validates the parameters from order([(param1, param2), (param1, param2)..]) func
     if validate_order:
         if (not user_choice.isdigit()) or (user_choice == 0):
             print(f"Error adding product. Try again!\n")
             return False
 
+    # validates the user input from the get_user_input() function
     elif not user_choice.isdigit():
         print(f"Error with your choice '{user_choice}'. Try again!")
         return False
@@ -65,11 +67,13 @@ def show_total_price(store_obj: object, product: object, product_quantity: str):
     :param product_quantity: The amount of item the user wants to order
     :return:
     """
+
     try:
-        total_price, total_item_received = store_obj.order([(product, int(product_quantity))])
+        total_price, total_item_received = store_obj.order([(product,
+                                                             int(product_quantity))])
         print("Product added to list.")
-    except ValueError:
-        print()
+    except ValueError as e:
+        print(e, '\n')
         pass
     else:
         # checks if buy 2, get 1 free promotion is applied to product
@@ -100,10 +104,10 @@ def list_all_products(store_obj: object) -> list[object]:
     :param store_obj (store object)
     :return: list[product object, ... ]
     """
-    all_products = store_obj.get_all_products()
+    all_products = store_obj.all_products
     print("-------------------------------")
     for index, product in enumerate(all_products):
-        print(f"{index + ONE}. {product.show()}")
+        print(f"{index + ONE}. {product}")
     print("-------------------------------")
     return all_products
 
@@ -115,7 +119,7 @@ def show_total_amount(store_obj: object):
     :param store_obj:
     """
     print("-------------------------------")
-    print(f" Total of {store_obj.get_total_quantity()} items in store")
+    print(f" Total of {store_obj.total_quantity} items in store")
     print("-------------------------------")
 
 
@@ -136,7 +140,7 @@ def make_order(store_obj: object):
         product_quantity = input('What amount do you want? ')
 
         # check for empty text
-        if (product_number == '') and (product_quantity == ''):
+        if (product_number == ' ') and (product_quantity == ' '):
             continue
 
         # Validate user choice for both prompts: product number and product quantity
@@ -146,20 +150,21 @@ def make_order(store_obj: object):
             # checks if prdt number is not more than total number of products in store
             if int(product_number) <= len(all_products):
 
-                # checks if prdt qtty is less than the total qtty in store
+                # Gets a the product chosen by a user from a product list (all_products)
                 product = all_products[int(product_number) - ONE]
-                if int(product_quantity) <= product.get_quantity():
+
+                # checks if prdt qtty is less than the total qtty in store
+                if int(product_quantity) <= product.quantity:
                     show_total_price(store_obj, product, product_quantity)
 
                 # checks if the product is non-stocked-product which has unlimited qtty
-                elif product.is_non_stocked_product():
+                elif product.is_non_stocked_product:
                     show_total_price(store_obj, product, product_quantity)
-
                 else:
-                    print(f'Error: The amount \'{product_quantity}\' is more than the '
+                    print(f"Error: The amount '{product_quantity}' is more than the "
                           'quantity available in the store.\n')
             else:
-                print(f"Error adding product. Try again!\n")
+                print("Error adding product. Try again!\n")
 
 
 def main():
@@ -180,11 +185,13 @@ def main():
         second_half_price = promotions.SecondHalfPrice("Second Half price!")
         third_one_free = promotions.ThirdOneFree("Third One Free!")
         thirty_percent = promotions.PercentDiscount("30% off!", percent=30)
+        ten_percent = promotions.PercentDiscount("10% off!", percent=10)
 
         # Add promotions to products
-        product_list[0].set_promotion(second_half_price)
-        product_list[1].set_promotion(third_one_free)
-        product_list[3].set_promotion(thirty_percent)
+        product_list[0].promotion = second_half_price
+        product_list[1].promotion = ten_percent
+        product_list[2].promotion = third_one_free
+        product_list[3].promotion = thirty_percent
 
         best_buy = store.Store(product_list)
         start(best_buy)

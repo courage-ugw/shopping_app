@@ -7,7 +7,7 @@ class Product:
     product currently available in the store. When someone will purchase it,
     the amount will be modified accordingly.
     """
-    promotion = object()
+    promotion_obj = object()
 
     def __init__(self, name: str, price: float, quantity: int):
         """
@@ -39,49 +39,51 @@ class Product:
         self._non_stocked_product = False
         self._total_price = 0
 
-    def get_price(self) -> float:
+    @property
+    def price(self) -> float:
         """ Getter function for price. Returns the price (float) """
         return self._price
 
-    def set_price(self, new_price):
+    @price.setter
+    def price(self, new_price):
         """ Setter function for price. """
+        if new_price <= 0:
+            raise ValueError("Price must be greater than 0")
         self._price = new_price
 
-    def get_total_price(self) -> float:
+    @property
+    def total_price(self) -> float:
         """ Getter function for total price. Returns the total price (float) """
         return self._total_price
 
-    def set_total_price(self, new_total_price):
+    @total_price.setter
+    def total_price(self, new_total_price):
         """ Setter function for total price. """
         self._total_price = new_total_price
 
-    def get_promotion(self):
+    @property
+    def promotion(self):
         """ Getter function for the promotion object (class variable).
         Returns the promotion object"""
-        return self.promotion
+        return self.promotion_obj
 
-    def set_promotion(self, promotion_obj: object):
+    @promotion.setter
+    def promotion(self, promotion_objt: object):
         """
          Setter function for the promotion object (class variable).
         """
-        self.promotion = promotion_obj
+        self.promotion_obj = promotion_objt
 
-    def is_non_stocked_product(self):
-        """
-        Getter function for Non Stocked Product. Quantity of Non Stocked Product is
-        always  zero.
-        Returns True if it is Non Stocked Product, otherwise False.
-        """
-        return self._non_stocked_product
-
-    def get_quantity(self) -> float:
+    @property
+    def quantity(self) -> float:
         """
         Getter function for quantity. Returns the quantity (float).
         :return: quantity (float)
         """
         return self._quantity
 
-    def set_quantity(self, quantity: int):
+    @quantity.setter
+    def quantity(self, quantity: int):
         """
         Setter function for quantity. If quantity reaches 0, deactivates the product.
         """
@@ -90,19 +92,28 @@ class Product:
         self._quantity += quantity
 
         # Deactivates product if product quantity is 0 (i.e., it is out of stock)
-        if self.get_quantity() <= 0:
+        if self._quantity <= 0:
             self._quantity = 0
             self.deactivate()
 
+    @property
     def is_active(self) -> bool:
         """
         Getter function for active.
         Returns True if the product is active, otherwise False.
         :return: True or False (bool)
         """
-        if self.get_quantity() <= 0:
+        if self._quantity <= 0:
             self._active = False
         return self._active
+
+    def is_non_stocked_product(self):
+        """
+        Getter function for Non Stocked Product.
+        Quantity of Non Stocked Product is always  zero.
+        Returns True if it is Non Stocked Product, otherwise False.
+        """
+        return self._non_stocked_product
 
     def activate(self):
         """
@@ -118,16 +129,23 @@ class Product:
         self._active = False
         self._product_name += ' (deactivated)'
 
-    def show(self) -> str:
+    def __len__(self):
+        return self._price
+
+    def __gt__(self, other):
+        return len(self) > len(other)
+
+    def __str__(self):
         """
         Returns a string that represents the product, for example:
         "MacBook Air M2, Price: 1450, Quantity: 100, Promotion: 30% off"
         if Promotion is not available on the product, Promotion: None
         """
-        if self.is_active():
+        if self.is_active:
             try:
                 return f"{self._product_name}, Price: {self._price}, " \
-                       f"Quantity: {self._quantity}, Promotion: {self.promotion.get_name()}"
+                       f"Quantity: {self._quantity}, Promotion: " \
+                       f"{self.promotion_obj.name}"
             except AttributeError:
                 # if there is no promotion
                 return f"{self._product_name}, Price: {self._price}, " \
@@ -149,10 +167,10 @@ class Product:
                              "product in the store")
 
         # Gets the total price for the product [price * quantity]
-        self._total_price = self.get_price() * quantity
+        self._total_price = self._price * quantity
         # check if there is promotion for the product
         if type(self.promotion) != object:
-            discount_price = product.get_promotion().apply_promotion(product, quantity)
+            discount_price = product.promotion.apply_promotion(product, quantity)
             self._quantity -= quantity
             return discount_price
         else:
@@ -176,6 +194,7 @@ class NonStockedProduct(Product):
         self._quantity = 0
         self._non_stocked_product = True
 
+    @property
     def is_active(self) -> bool:
         """
         Getter function for active.
@@ -184,6 +203,7 @@ class NonStockedProduct(Product):
         """
         return self._active
 
+    @property
     def is_non_stocked_product(self):
         """
         Getter function for Non Stocked Product.
@@ -192,7 +212,7 @@ class NonStockedProduct(Product):
         """
         return self._non_stocked_product
 
-    def show(self) -> str:
+    def __str__(self):
         """
         Returns a string that represents the product, for example:
         "MacBook Air M2, Price: 1450, Quantity: 100, Promotion: Second Half Price"
@@ -200,7 +220,7 @@ class NonStockedProduct(Product):
         """
         try:
             product = f"{self._product_name}, Price: {self._price}, Quantity: Unlimited, " \
-                      f"Promotion: {self.promotion.get_name()}"
+                      f"Promotion: {self.promotion_obj.name}"
         except AttributeError:
             product = f"{self._product_name}, Price: {self._price}, Quantity: Unlimited, " \
                       f"Promotion: None"
@@ -224,7 +244,7 @@ class NonStockedProduct(Product):
 
         # check if there is promotion for the product
         if type(self.promotion) != object:
-            discount_price = product.get_promotion().apply_promotion(product, quantity)
+            discount_price = product.promotion.apply_promotion(product, quantity)
             return discount_price
 
         return self._total_price
@@ -236,15 +256,16 @@ class LimitedProduct(Product):
     If an order is attempted with quantity larger than the maximum X- number, it
     refuses with an exception.
     """
+
     def __init__(self, name: str, price: float, quantity: int, maximum: int):
-        """ Constructor method. Creates the instance variables for LimitedProduct Class """
+        """Constructor method. Creates the instance variables for LimitedProduct Class"""
         super().__init__(name, price, quantity)
         self._product_name = name
         self._price = price
         self._quantity = quantity
         self._max_purchase = maximum
 
-    def show(self) -> str:
+    def __str__(self):
         """
         Returns a string that represents the product, for example:
         "MacBook Air M2, Price: 1450, Quantity: 100, Promotion: Second Half Price"
@@ -253,7 +274,7 @@ class LimitedProduct(Product):
         try:
             product = f"{self._product_name}, Price: {self._price}, " \
                       f"Limited to {self._max_purchase} per order!, " \
-                      f"Promotion: {self.promotion.get_name()}"
+                      f"Promotion: {self.promotion_obj.name}"
         except AttributeError:
             product = f"{self._product_name}, Price: {self._price}, " \
                       f"Limited to {self._max_purchase} per order!, " \
@@ -280,6 +301,7 @@ class LimitedProduct(Product):
 
         # check if there is promotion for the product
         if type(self.promotion) != object:
-            discount_price = product.get_promotion().apply_promotion(product, quantity)
+            discount_price = product.promotion.apply_promotion(product, quantity)
             return discount_price
+
         return self._total_price

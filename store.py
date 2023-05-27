@@ -27,22 +27,24 @@ class Store:
         self._products.remove(product)
         return f"Product '{product}' successfully removed from store"
 
-    def get_total_quantity(self) -> int:
+    @property
+    def total_quantity(self) -> int:
         """
         Returns how many items are in the store in total
         """
         total_quantity = 0
         for product in self._products:
-            total_quantity += product.get_quantity()
+            total_quantity += product.quantity
         return total_quantity
 
-    def get_all_products(self) -> list[object]:
+    @property
+    def all_products(self) -> list[object]:
         """
         Returns all products in the store that are active.
         """
         all_products = []
         for product in self._products:
-            if product.is_active():
+            if product.is_active:
                 all_products.append(product)
         return all_products
 
@@ -68,3 +70,9 @@ class Store:
             else:
                 total_order_price += total_price
         return total_order_price, total_item_received
+
+    def __contains__(self, item):
+        return item in self._products
+
+    def __add__(self, other):
+        return Store(self._products + other._products)

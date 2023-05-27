@@ -16,11 +16,13 @@ class Promotion(ABC):
         """ Constructor of the Promotion Class"""
         self._name = name
 
-    def get_name(self):
+    @property
+    def name(self):
         """ Getter method for the name attribute"""
         return self._name
 
-    def set_name(self, new_name):
+    @name.setter
+    def name(self, new_name):
         """ Setter method for the name attribute"""
         self._name = new_name
 
@@ -54,8 +56,9 @@ class PercentDiscount(Promotion):
         :param quantity: order quantity
         :return: discount price (float)
         """
-        total_price = product.get_total_price()
-        discount_price = total_price - (total_price * self._percent * 0.01)
+        total_price_per_order = product.total_price
+        discount_price = total_price_per_order - (total_price_per_order *
+                                                  self._percent * 0.01)
         return discount_price
 
 
@@ -75,7 +78,7 @@ class SecondHalfPrice(Promotion):
         :param quantity: order quantity
         :return: discount price (float)
         """
-        regular_price = product.get_price()
+        regular_price = product.price
         full_priced_items = quantity - math.floor(quantity / 2)
         half_priced_items = math.floor(quantity / 2)
         half_of_regular_price = regular_price / 2
@@ -99,7 +102,7 @@ class ThirdOneFree(Promotion):
         :param quantity: order quantity
         :return: price and total item received (tuple)
         """
-        price = product.get_price()
+        price = product.price
         total_price = price * quantity
         total_item_received = quantity + (quantity // 2)
         return total_price, total_item_received
