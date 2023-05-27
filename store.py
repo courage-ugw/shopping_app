@@ -38,7 +38,7 @@ class Store:
         return total_quantity
 
     @property
-    def all_products(self) -> list[object]:
+    def all_products(self):
         """
         Returns all products in the store that are active.
         """
@@ -48,7 +48,7 @@ class Store:
                 all_products.append(product)
         return all_products
 
-    def order(self, shopping_list: list[tuple]) -> tuple:
+    def order(self, shopping_list):
         """
         Gets a list of tuples, where each tuple has 2 items:
         Product (Product object) and quantity (int).

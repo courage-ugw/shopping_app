@@ -97,7 +97,7 @@ def start(store_obj: object):
     print("Thanks for shopping! Bye!")
 
 
-def list_all_products(store_obj: object) -> list[object]:
+def list_all_products(store_obj):
     """
     Gets the Object parameter, gets all the products in the store. Prints the list of
     available products to the screen. Returns a list of product objects
